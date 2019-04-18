@@ -2236,26 +2236,30 @@ class ZappaCLI(object):
             if sys.version_info[0] < 3:
                 # Exclude packages already builtin to the python lambda environment
                 # Related: https://github.com/Miserlou/Zappa/issues/556
-                exclude = self.stage_config.get(
-                        'exclude', [
-                                        "boto3",
-                                        "dateutil",
-                                        "botocore",
-                                        "s3transfer",
-                                        "six.py",
-                                        "jmespath",
-                                        "concurrent"
-                                    ])
+                default_exclusions = [
+                    "boto3",
+                    "dateutil",
+                    "botocore",
+                    "s3transfer",
+                    "six.py",
+                    "jmespath",
+                    "concurrent"
+                ]
             else:
                 # This could be python3.6 optimized.
-                exclude = self.stage_config.get(
-                        'exclude', [
-                                        "boto3",
-                                        "dateutil",
-                                        "botocore",
-                                        "s3transfer",
-                                        "concurrent"
-                                    ])
+                default_exclusions = [
+                    "boto3",
+                    "dateutil",
+                    "botocore",
+                    "s3transfer",
+                    "concurrent"
+                ]
+
+            exclude = self.stage_config.get('exclude')
+            try:
+                exclude = list(set(exclude).union(default_exclusions))
+            except TypeError:
+                exclude = default_exclusions
 
             # Create a single zip that has the handler and application
             self.zip_path = self.zappa.create_lambda_zip(
